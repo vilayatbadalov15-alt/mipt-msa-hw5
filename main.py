@@ -1,11 +1,11 @@
 import requests
 
 def get_text(url):
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
     return response.text
 
-def count_word_frequencies(url, word):
-    text = get_text(url)
+def count_word_frequencies(text, word):
     words = text.split()
     count = 0
     for w in words:
@@ -24,10 +24,16 @@ def main():
             if word:
                 words_to_count.append(word)
 
+    try:
+        text = get_text(url)
+    except requests.exceptions.RequestException as error:
+        print(f"Не удалось загрузить страницу {url}: {error}")
+        return
+
     frequencies = {}
     for word in words_to_count:
-        frequencies[word] = count_word_frequencies(url, word)
-    
+        frequencies[word] = count_word_frequencies(text, word)
+
     print(frequencies)
 
 if __name__ == "__main__":
